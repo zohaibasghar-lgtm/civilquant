@@ -1,9 +1,7 @@
 # CivilQuant
 
-CivilQuant is an engineering calculator under development for bar bending schedules, steel weight, construction quantity takeoff, camera reference capture and measurement sheets.
+Free engineering calculator: reinforcement BBS, quantity takeoffs, local measurement sheets and PDF export. Camera photographs and PDF drawing AI processing are integrated through authenticated Supabase Edge Functions when configured.
 
-**This is an engineering estimation tool.** Cutting lengths, dimensions, bending allowances and site quantities must be verified against project specifications and approved drawings.
+**Monetization support is integrated but not active:** RevenueCat SDK and server entitlement table, plus consent-aware AdMob test ads. Real charges and ad earnings require approved Google Play / AdMob merchant accounts and build variables. See [ACTIVATE.md](docs/ACTIVATE.md).
 
-The upcoming Android APK is a free test release. Photo-based automatic AI takeoff, subscriptions and revenue-generating ads are **not yet activated**.
-
-See `app/` for the Expo source and `.github/workflows/` for the Android test build.
+The standalone test APK is built by GitHub Actions. No provider secret keys belong in the public GitHub repo.
