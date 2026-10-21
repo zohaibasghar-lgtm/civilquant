@@ -1,7 +1,6 @@
 import React,{useState,useEffect} from 'react';
 import {SafeAreaView,ScrollView,View,Text,TextInput,TouchableOpacity,Alert,Image,StatusBar,StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AIAnalysis from './src/AIAnalysis';
 import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -15,7 +14,7 @@ import {CivilQuantBanner} from './src/ads';
 import {barBbs,takeoff,ITEMS,round} from './src/engineering';
 const teal='#007f83', ink='#11293e';
 const Label=({children})=><Text style={s.label}>{children}</Text>;
-const Field=({label,value,onChangeText,keyboardType='decimal-pad'})=><View style={{flex:1,minWidth:120}}><Label>{label}</Label><TextInput style={s.field} value={value} onChangeText={onChangeText} keyboardType={keyboardType} placeholderTextColor="#6e8291"/></View>;
+const Field=({label,value,onChangeText,keyboardType='decimal-pad'})=><View style={{flex:1,minWidth:120}}><Label>{label}</Label><TextInput style={s.field} value={value} onChangeText={onChangeText} keyboardType={keyboardType} secureTextEntry={label.toLowerCase().includes('password')} autoCapitalize={label.toLowerCase().includes('password')||label.toLowerCase().includes('email')?'none':'sentences'} placeholderTextColor="#6e8291"/></View>;
 const Button=({title,onPress,light=false})=><TouchableOpacity accessibilityRole="button" style={[s.button,light&&s.light]} onPress={onPress}><Text style={[s.buttonText,light&&{color:ink}]}>{title}</Text></TouchableOpacity>;
 const Box=({title,children})=><View style={s.panel}><Text style={s.h2}>{title}</Text>{children}</View>;
 export default function App(){
@@ -163,7 +162,6 @@ export default function App(){
    <Button title="Manage subscriptions in store" light onPress={manageSubscription}/>
    {user&&<Button title="Delete my account" light onPress={deleteAccount}/>}
  </Box>}
- {tab==='AI'&&<AIAnalysis/>}
  <View style={s.warning}><Text style={{color:'#654e1b'}}>ENGINEERING NOTE: All quantities are estimates. Verify with drawings, site measurements, bar schedules and applicable engineering standards before construction or billing.</Text></View>
  </ScrollView><CivilQuantBanner isPro={isPro}/></SafeAreaView>;
 }
