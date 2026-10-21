@@ -12,6 +12,7 @@ import {supabase,hasCloud} from './src/cloud';
 import {setupPurchases,hasBilling,listPackages,buyPackage,restorePurchases,manageSubscription,currentProEntitlement} from './src/purchases';
 import {CivilQuantBanner} from './src/ads';
 import {barBbs,takeoff,ITEMS,round} from './src/engineering';
+import {offlineDrawingTakeoff} from './src/offlineTakeoff';
 const teal='#007f83', ink='#11293e';
 const Label=({children})=><Text style={s.label}>{children}</Text>;
 const Field=({label,value,onChangeText,keyboardType='decimal-pad'})=><View style={{flex:1,minWidth:120}}><Label>{label}</Label><TextInput style={s.field} value={value} onChangeText={onChangeText} keyboardType={keyboardType} secureTextEntry={label.toLowerCase().includes('password')} autoCapitalize={label.toLowerCase().includes('password')||label.toLowerCase().includes('email')?'none':'sentences'} placeholderTextColor="#6e8291"/></View>;
@@ -63,6 +64,7 @@ export default function App(){
       const found=await recognizeText(photo);
       const text=String(found?.text||'');
       setOcrText(text || 'No legible text was detected. Retake the photo closer to the drawing.');
+      setAnalysis(offlineDrawingTakeoff(text));
    }catch(e){Alert.alert('Offline recognition failed',e?.message||'The device could not read this photograph.');}
    finally{setOcrBusy(false);}
  };
@@ -114,7 +116,7 @@ export default function App(){
  const capture=async()=>{const perm=await ImagePicker.requestCameraPermissionsAsync();if(!perm.granted){Alert.alert('Camera permission','Enable camera access in system settings.');return;}const res=await ImagePicker.launchCameraAsync({mediaTypes:['images'],quality:.55,base64:true});if(!res.canceled)selectImage(res.assets[0]);};
  const choose=async()=>{const res=await ImagePicker.launchImageLibraryAsync({mediaTypes:['images'],quality:.55,base64:true});if(!res.canceled)selectImage(res.assets[0]);};
  const exportPdf=async()=>{if(!rows.length){Alert.alert('Empty sheet','Add at least one item first.');return;}const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const html='<html><body style="font-family:Arial"><h1>CivilQuant - Measurement Sheet</h1><h3>'+esc(project)+'</h3><table border="1" cellspacing="0" cellpadding="8"><tr><th>No</th><th>Item</th><th>Measurements</th><th>Quantity</th><th>Unit</th></tr>'+rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.description)+'</td><td>'+esc(r.notes)+'</td><td>'+round(r.quantity)+'</td><td>'+esc(r.unit)+'</td></tr>').join('')+'</table><p>Verify dimensions and specifications before construction or payment certification.</p></body></html>';try{const {uri}=await Print.printToFileAsync({html});await Sharing.shareAsync(uri,{mimeType:'application/pdf'});}catch(e){Alert.alert('Export failed',e.message)}};
- return <SafeAreaView style={s.root}><StatusBar backgroundColor={ink} barStyle="light-content"/><View style={s.header}><Text style={s.brand}>▦ CIVILQUANT</Text><Text style={s.subtitle}>Civil engineering estimates · AI integration preview</Text></View>
+ return <SafeAreaView style={s.root}><StatusBar backgroundColor={ink} barStyle="light-content"/><View style={s.header}><Text style={s.brand}>▦ CIVILQUANT</Text><Text style={s.subtitle}>Civil engineering estimates · Offline OCR and optional cloud AI</Text></View>
  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{maxHeight:48,backgroundColor:'#e0ebed'}} contentContainerStyle={s.tabs}>{['Steel BBS','Takeoff','Sheets','AI Drawings','Pro'].map(x=><TouchableOpacity key={x} onPress={()=>{setTab(x);setResult(null)}} style={[s.tab,tab===x&&s.active]}><Text style={[s.tabText,tab===x&&{color:'#fff'}]}>{x}</Text></TouchableOpacity>)}</ScrollView>
  <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
  {tab==='Steel BBS'&&<Box title="Steel weight & cutting length"><View style={s.row}><Field label="Diameter (mm)" value={diameter} onChangeText={setDiameter}/><Field label="Number of bars" value={count} onChangeText={setCount}/></View><Field label="Centerline segments (mm, comma separated)" value={segments} onChangeText={setSegments} keyboardType="default"/><View style={s.row}><Field label="Hooks per bar" value={hooks} onChangeText={setHooks}/><Field label="Each hook (mm)" value={hookLength} onChangeText={setHookLength}/></View><Field label="Bend deduction per bar (mm)" value={deduction} onChangeText={setDeduction}/><Button title="Calculate steel" onPress={calculateBbs}/><Text style={s.hint}>Approximate bar weight: d²/162 kg/m. Bend allowances must be checked against your code and bar shape.</Text></Box>}
@@ -132,6 +134,7 @@ export default function App(){
   <Button title="Choose photo" light onPress={choose}/>
   <Button title="Choose PDF drawing" light onPress={choosePdf}/>
   <Button title={ocrBusy?'Scanning text...':'Read drawing text OFFLINE (free)'} light onPress={scanOffline}/>
+  {!!ocrText&&<Text style={s.hint}>Offline OCR computes geometric quantities only from readable dimensions with explicit units. Check every detected dimension before adding it.</Text>}
   {!!ocrText&&<View style={s.sheetItem}><Text style={{fontWeight:'700',color:ink}}>Recognized labels/dimensions (unverified):</Text><Text selectable style={{color:ink,marginTop:8}}>{ocrText.slice(0,1800)}</Text>
   <Button title="Use scan as question context" light onPress={()=>setQuestion((question+'\nDetected drawing text (unverified): '+ocrText.slice(0,350)).slice(0,790))}/></View>}
   {asset&&<Text style={s.hint}>Selected: {asset.name} ({asset.mime})</Text>}
