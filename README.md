@@ -1,7 +1,7 @@
-# CivilQuant
+# CivilQuant Android v1.1
 
-Free engineering calculator: reinforcement BBS, quantity takeoffs, local measurement sheets and PDF export. Camera photographs and PDF drawing AI processing are integrated through authenticated Supabase Edge Functions when configured.
+Free engineering calculations: reinforcement BBS, concrete/earthwork/masonry/formwork/flooring/road takeoffs, measurements and PDF export. The Android camera can scan labels and dimensions **offline** using Google ML Kit text recognition. OCR text can be wrong; never rely on it without verifying source drawings.
 
-**Monetization support is integrated but not active:** RevenueCat SDK and server entitlement table, plus consent-aware AdMob test ads. Real charges and ad earnings require approved Google Play / AdMob merchant accounts and build variables. See [ACTIVATE.md](docs/ACTIVATE.md).
+Paid AI photo/PDF reasoning, RevenueCat subscriptions (PKR 750 monthly target) and approved AdMob banner revenue are **integrated as code, not live** until your Supabase/OpenAI and app-store merchant credentials are supplied and deployed. When unconfigured, the application intentionally displays setup warnings and Google test ads only.
 
-The standalone test APK is built by GitHub Actions. No provider secret keys belong in the public GitHub repo.
+See [docs/ACTIVATE.md](docs/ACTIVATE.md) for the external account approvals, deployment steps, security checks and costs. This GitHub Actions workflow builds test APKs using disposable signing credentials and is not the Google Play release process.

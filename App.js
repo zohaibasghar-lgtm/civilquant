@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Crypto from 'expo-crypto';
+import {recognizeText} from '@infinitered/react-native-mlkit-text-recognition';
 import {supabase,hasCloud} from './src/cloud';
 import {setupPurchases,hasBilling,listPackages,buyPackage,restorePurchases,manageSubscription,currentProEntitlement} from './src/purchases';
 import {CivilQuantBanner} from './src/ads';
@@ -22,7 +23,7 @@ export default function App(){
  const [result,setResult]=useState(null),[rows,setRows]=useState([]),[photo,setPhoto]=useState(null);
  const [user,setUser]=useState(null),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[accountBusy,setAccountBusy]=useState(false);
  const [asset,setAsset]=useState(null),[question,setQuestion]=useState('Calculate measurable concrete, formwork, steel and masonry quantities from this drawing.'),[knownDimension,setKnownDimension]=useState('');
- const [analysis,setAnalysis]=useState(null),[aiBusy,setAiBusy]=useState(false),[quota,setQuota]=useState(null),[packages,setPackages]=useState([]),[isPro,setIsPro]=useState(false);
+ const [analysis,setAnalysis]=useState(null),[aiBusy,setAiBusy]=useState(false),[quota,setQuota]=useState(null),[packages,setPackages]=useState([]),[isPro,setIsPro]=useState(false),[ocrText,setOcrText]=useState(''),[ocrBusy,setOcrBusy]=useState(false);
  useEffect(()=>{
   if(!supabase)return;
   let mounted=true;
@@ -54,6 +55,16 @@ export default function App(){
    Alert.alert('Verify drawing measurements','AI results are preliminary and may be incorrect. Have you checked this item against approved drawings and site measurements?',[
       {text:'Cancel'},{text:'Add verified estimate',onPress:()=>persist([...rows,{id:String(Date.now()),description:item.item,quantity:item.quantity,unit:item.unit,notes:item.formula+' | '+item.evidence,source:'AI draft—user confirmed'}])}
    ]);
+ };
+ const scanOffline=async()=>{
+   if(!photo){Alert.alert('Photo required','Choose or capture a clear photograph of the drawing. Offline text recognition does not process PDFs yet.');return;}
+   setOcrBusy(true);setOcrText('');
+   try{
+      const found=await recognizeText(photo);
+      const text=String(found?.text||'');
+      setOcrText(text || 'No legible text was detected. Retake the photo closer to the drawing.');
+   }catch(e){Alert.alert('Offline recognition failed',e?.message||'The device could not read this photograph.');}
+   finally{setOcrBusy(false);}
  };
  const analyze=async()=>{
    if(!user||!supabase){Alert.alert('Sign in required','An authenticated account is required for AI analysis.');return;}
@@ -120,6 +131,9 @@ export default function App(){
   <Button title="Take drawing photo" onPress={capture}/>
   <Button title="Choose photo" light onPress={choose}/>
   <Button title="Choose PDF drawing" light onPress={choosePdf}/>
+  <Button title={ocrBusy?'Scanning text...':'Read drawing text OFFLINE (free)'} light onPress={scanOffline}/>
+  {!!ocrText&&<View style={s.sheetItem}><Text style={{fontWeight:'700',color:ink}}>Recognized labels/dimensions (unverified):</Text><Text selectable style={{color:ink,marginTop:8}}>{ocrText.slice(0,1800)}</Text>
+  <Button title="Use scan as question context" light onPress={()=>setQuestion((question+'\nDetected drawing text (unverified): '+ocrText.slice(0,350)).slice(0,790))}/></View>}
   {asset&&<Text style={s.hint}>Selected: {asset.name} ({asset.mime})</Text>}
   {photo&&<Image source={{uri:photo}} resizeMode="contain" style={{width:'100%',height:230,borderRadius:10,marginTop:12}}/>}
   <Field label="Question for engineering AI" value={question} onChangeText={setQuestion} keyboardType="default"/>
