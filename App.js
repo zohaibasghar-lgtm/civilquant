@@ -7,7 +7,7 @@ import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Crypto from 'expo-crypto';
-import {recognizeText} from '@infinitered/react-native-mlkit-text-recognition';
+import {recognizeText} from 'expo-mlkit-ocr';
 import {supabase,hasCloud} from './src/cloud';
 import {setupPurchases,hasBilling,listPackages,buyPackage,restorePurchases,manageSubscription,currentProEntitlement} from './src/purchases';
 import {CivilQuantBanner} from './src/ads';
