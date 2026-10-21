@@ -11,6 +11,9 @@ Deno.serve(async req=>{
  if(!e?.id || !e?.app_user_id)return new Response('Bad event',{status:400});
  const userId=String(e.app_user_id);
  if(!UUID.test(userId))return new Response('Unmapped user',{status:200});
+ const validEvents=new Set(['INITIAL_PURCHASE','RENEWAL','PRODUCT_CHANGE','CANCELLATION','EXPIRATION','BILLING_ISSUE','SUBSCRIPTION_EXTENDED','UNCANCELLATION','NON_RENEWING_PURCHASE']);
+ if(e.environment!=='PRODUCTION'||!validEvents.has(String(e.type||'')))return new Response('Ignored non-production or non-subscription event',{status:200});
+ if(!Array.isArray(e.entitlement_ids)||!e.entitlement_ids.includes('civilquant_pro'))return new Response('Ignored unrelated entitlement',{status:200});
  const expiry=Number(e.expiration_at_ms||0);
  const event=Number(e.event_timestamp_ms||Date.now());
  const expiresAt=expiry>0&&Number.isFinite(expiry)?new Date(expiry).toISOString():null;
