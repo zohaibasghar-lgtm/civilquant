@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "CivilQuant",
+    "slug": "civilquant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.civilquant.engineering",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "CivilQuant needs access to your camera for site photo references.",
+          "photosPermission": "CivilQuant needs access to your photos for drawing references."
+        }
+      ]
+    ],
+    "extra": {
+      "releaseChannel": "manual-estimation-test"
+    }
+  }
+}
