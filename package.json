@@ -23,6 +23,6 @@
     "expo-file-system": "~19.0.17",
     "expo-crypto": "~15.0.7",
     "react-native-purchases": "^9.6.0",
-    "react-native-google-mobile-ads": "^16.0.0"
+    "react-native-google-mobile-ads": "16.3.4"
   }
 }
