@@ -18,32 +18,30 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - name: Validate calculation engine
         run: node --test tests/*.test.mjs
-      - name: Install compatible Expo dependencies
+      - name: Install Expo dependencies
         run: |
           npm install --no-audit --no-fund
-          npx expo install --fix --non-interactive
-      - name: Generate Android project
+          CI=1 npx expo install --fix
+      - name: Generate Android native project
         env:
           CI: '1'
         run: npx expo prebuild --platform android --clean --no-install
-      - name: Compile signed debug APK
+      - name: Build Android signed debug APK
         working-directory: android
         env:
           CI: '1'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --stacktrace
-      - name: Verify Android package
+      - name: Verify APK and checksum
         run: |
           test -s android/app/build/outputs/apk/debug/app-debug.apk
           mkdir -p dist
           cp android/app/build/outputs/apk/debug/app-debug.apk dist/CivilQuant-test.apk
           sha256sum dist/CivilQuant-test.apk > dist/SHA256SUMS.txt
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: CivilQuant-Android-APK
           path: dist/
