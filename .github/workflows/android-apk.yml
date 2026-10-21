@@ -1,4 +1,4 @@
-name: CivilQuant Android APK
+name: CivilQuant Standalone Android APK
 on:
   push:
     branches: [main]
@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Validate calculation engine
+      - name: Check engineering computations
         run: node --test tests/*.test.mjs
       - name: Install Expo dependencies
         run: |
@@ -28,21 +28,28 @@ jobs:
         env:
           CI: '1'
         run: npx expo prebuild --platform android --clean --no-install
-      - name: Build Android signed debug APK
+      - name: Compile standalone APK with bundled JavaScript
         working-directory: android
         env:
           CI: '1'
+          NODE_ENV: production
         run: |
+          set -euo pipefail
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace
-      - name: Verify APK and checksum
+          keytool -genkeypair -keystore "$RUNNER_TEMP/cq-test.jks" -storepass android -keypass android -alias cq -keyalg RSA -keysize 2048 -validity 365 -dname "CN=CivilQuant Test, O=CivilQuant, C=PK"
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/cq-test.jks"             -Pandroid.injected.signing.store.password=android             -Pandroid.injected.signing.key.alias=cq             -Pandroid.injected.signing.key.password=android
+      - name: Verify signed release APK
         run: |
-          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          set -euo pipefail
+          APK="$(find android/app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -type f | head -1)"
+          test -s "$APK"
           mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/CivilQuant-test.apk
-          sha256sum dist/CivilQuant-test.apk > dist/SHA256SUMS.txt
+          cp "$APK" dist/CivilQuant-standalone.apk
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          "$APKSIGNER" verify dist/CivilQuant-standalone.apk
+          sha256sum dist/CivilQuant-standalone.apk > dist/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: CivilQuant-Android-APK
+          name: CivilQuant-Standalone-Android-APK
           path: dist/
           retention-days: 30
