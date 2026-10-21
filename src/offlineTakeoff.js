@@ -37,7 +37,7 @@ export function offlineDrawingTakeoff(ocrText){
     const triple=[...line.matchAll(pattern3)];
     if(triple.length){
       for(const m of triple){
-        if(m.index>0 && /[0-9.\\-]/.test(line[m.index-1]))continue;
+        if(m.index>0 && /[0-9.-]/.test(line[m.index-1]))continue;
         const d=dimensions([m[1],m[2],m[3],m[4],m[5],m[6]]);
         if(!d)continue;
         const [L,B,H]=d.converted;
@@ -48,9 +48,9 @@ export function offlineDrawingTakeoff(ocrText){
       continue; // don't double-count the area inside a three-dimensional match
     }
     // A malformed or partly unscaled three-dimensional expression is not a valid 2D area.
-    if((line.match(/(?:[0-9]|m|cm|mm)\\s*[x×*]\\s*(?=[0-9.\\-])/gi)||[]).length>1)continue;
+    if((line.match(/(?:[0-9]|m|cm|mm)\s*[x×*]\s*(?=[0-9.-])/gi)||[]).length>1)continue;
     for(const m of line.matchAll(pattern2)){
-      if(m.index>0 && /[0-9.\\-]/.test(line[m.index-1]))continue;
+      if(m.index>0 && /[0-9.-]/.test(line[m.index-1]))continue;
       const d=dimensions([m[1],m[2],m[3],m[4]]);
       if(!d)continue;
       const [L,B]=d.converted;
