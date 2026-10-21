@@ -1,0 +1,5 @@
+[functions.analyze-drawing]
+verify_jwt = true
+
+[functions.revenuecat-webhook]
+verify_jwt = false
