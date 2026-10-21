@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import {SafeAreaView,ScrollView,View,Text,TextInput,TouchableOpacity,Alert,Image,StatusBar,StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AIAnalysis from './src/AIAnalysis';
 import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -162,6 +163,7 @@ export default function App(){
    <Button title="Manage subscriptions in store" light onPress={manageSubscription}/>
    {user&&<Button title="Delete my account" light onPress={deleteAccount}/>}
  </Box>}
+ {tab==='AI'&&<AIAnalysis/>}
  <View style={s.warning}><Text style={{color:'#654e1b'}}>ENGINEERING NOTE: All quantities are estimates. Verify with drawings, site measurements, bar schedules and applicable engineering standards before construction or billing.</Text></View>
  </ScrollView><CivilQuantBanner isPro={isPro}/></SafeAreaView>;
 }
